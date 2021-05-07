@@ -11,6 +11,10 @@ provider "aws" {
   region = "us-east-1"
 }
 
+locals {
+  private = "private"
+}
+
 resource "aws_s3_bucket" "checkov_bucket" {
   bucket        = "checkov-test-bucket"
   acl           = "private"
@@ -18,6 +22,5 @@ resource "aws_s3_bucket" "checkov_bucket" {
 
   tags = {
     Purpose = "checkov",
-
   }
 }

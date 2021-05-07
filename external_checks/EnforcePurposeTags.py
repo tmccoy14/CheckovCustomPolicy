@@ -1,5 +1,6 @@
 from checkov.terraform.checks.resource.base_resource_check import BaseResourceCheck
 from checkov.common.models.enums import CheckResult, CheckCategories
+from lark import Token
 
 
 """
@@ -11,10 +12,10 @@ argument disabled. This check is created to ensure the objects within the S3 buc
 # https://www.checkov.io/2.Concepts/Custom%20Policies.html
 
 
-class S3DisableForceDestroy(BaseResourceCheck):
+class EnforcePurposeTags(BaseResourceCheck):
     def __init__(self):
-        name = "Ensure bucket force destroy is disabled."
-        id = "CKV_AWS_001"
+        name = 'Ensure the resource is tagged with Purpose = "checkov" tag.'
+        id = "CKV_AWS_002"
         supported_resources = ["aws_s3_bucket"]
         # CheckCategories are defined in models/enums.py
         categories = [CheckCategories.BACKUP_AND_RECOVERY]
@@ -32,10 +33,12 @@ class S3DisableForceDestroy(BaseResourceCheck):
         :param conf: aws_s3_bucket configuration
         :return: <CheckResult>
         """
-        if "force_destroy" in conf.keys():
-            if conf["force_destroy"][0]:
-                return CheckResult.FAILED
-        return CheckResult.PASSED
+        if "tags" in conf.keys():
+            environment_tag = "Purpose"
+            if environment_tag in conf["tags"][0].keys():
+                if conf["tags"][0][environment_tag] == "checkov":
+                    return CheckResult.PASSED
+        return CheckResult.FAILED
 
 
-scanner = S3DisableForceDestroy()
+scanner = EnforcePurposeTags()
